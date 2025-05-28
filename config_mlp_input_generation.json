@@ -1,0 +1,33 @@
+{
+  "file_paths":
+  {
+    "paired_station_wl_data": "",
+    "paired_station_wind_data": "",
+    "target_station_wl_data": "",
+    "output": ""
+  },
+  "output_settings":
+  {
+    "dataset_quantity_request": 3,
+    "dataset_length_days_request": 365,
+    "window_size_past": [240, 240],
+    "window_size_future": [240, 0]
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
