@@ -15,7 +15,7 @@ Estrada (Texas A&M University-Corpus Christi).
 
 * **Input Generation**: Create input features suitable for MLP models.
 
-* **Model Training**: Train an MLP model to predict missing water level values.
+* **Model Training**: Train an MLP model to predict water level values.
 
 * **Water Level Prediction**: Apply the trained model to predict water level values.
 
