@@ -1,5 +1,5 @@
 """
-Assumes...??
+Assumes columns of data are in the order: datetime, water level, wind speed, wind direction.
 """
 
 # Imports.
@@ -16,12 +16,13 @@ import helpers
 config = helpers.load_configs("config_mlp_input_generation.json")
 file_paths = config['file_paths']
 
-# Get data files.
-# Store datetime, water level, wind from paired station, and water level from primary station in data frame.
-# Parse datetimes and set as index.
-input_wl_data = pd.read_csv(file_paths['paired_station_wl_data'], parse_dates=True, index_col=0)
-# input_wind_data = pd.read_csv(file_paths['paired_station_wind_data'], parse_dates=True, index_col=0)
+# Get data files. Parse datetimes and set as index.
+input_data = pd.read_csv(file_paths['paired_station_wl_data'], parse_dates=True, index_col=0)
 target_wl_data = pd.read_csv(file_paths['target_station_wl_data'], parse_dates=True, index_col=0)
+
+# Store paired station water level and wind.
+input_wl_data = input_data.drop(columns=[input_data.columns[1:]])
+input_wind_data = input_data.drop(columns=[input_data.columns[1:3]])
 
 # all_data_temp
 all_data = pd.merge(target_wl_data, input_wl_data, left_index=True, right_index=True, how='left',
