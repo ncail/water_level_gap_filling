@@ -21,7 +21,7 @@ from sklearn.metrics import (mean_squared_error, root_mean_squared_error, mean_a
 import helpers
 
 ''' *********************************************** FUNCTIONS *********************************************** '''
-def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
+def plot_model_predictions(testing_labels, predictions, x_indices, title, x_label, y_label,
                            plot_file_name, legend_location='best'):
     """
     Plots model predictions and compares to testing labels to evaluate the model performance
@@ -47,15 +47,15 @@ def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
     fig, ax = plt.subplots(1, figsize=(25, 10))
 
     # Plot the observations and model predictions on the same plot
-    plt.plot(testing_labels, label='Observed')
-    plt.plot(predictions, label='Predicted')
+    plt.plot(x_indices, testing_labels, label='Observed')
+    plt.plot(x_indices, predictions, label='Predicted')
 
     plt.title(title, fontsize=30)
 
     ax.set_xlabel(x_label, fontsize=22)
     ax.set_ylabel(y_label, fontsize=22)
 
-    plt.xticks(fontsize=20)
+    plt.xticks(fontsize=20, ha='right', rotation=45)
     plt.yticks(fontsize=20)
 
     plt.legend(fontsize=20, loc=legend_location)
@@ -163,62 +163,66 @@ validation_inputs = validation_data_inputs.values
 
 
 ''' *********************************************** BUILD MLP *********************************************** '''
-config_model = config['mlp_parameters']
+if config['existing_model']:
+    model = load_model(config['existing_model'])
 
-# Create a simple sequential model
-model = Sequential()
+if not config['existing_model']:
+    config_model = config['mlp_parameters']
 
-# Hidden Layer with 20 hidden neurons and relu activation function
-model.add(Dense(units=config_model['hidden_neurons'], activation='relu'))
+    # Create a simple sequential model
+    model = Sequential()
 
-# Dropout Layer with a small dropout rate (good for when you have a large amount of samples).
-model.add(Dropout(rate=config_model['dropout_rate']))
+    # Hidden Layer with 20 hidden neurons and relu activation function
+    model.add(Dense(units=config_model['hidden_neurons'], activation='relu'))
 
-# Output Layer outputs one value, 6-minute water level.
-model.add(Dense(1, kernel_initializer='normal'))
+    # Dropout Layer with a small dropout rate (good for when you have a large amount of samples).
+    model.add(Dropout(rate=config_model['dropout_rate']))
 
-# Compile model using mean squared error (MSE) loss function and adam optimizer.
-model.compile(loss=config_model['loss'], optimizer='adam')
+    # Output Layer outputs one value, 6-minute water level.
+    model.add(Dense(1, kernel_initializer='normal'))
+
+    # Compile model using mean squared error (MSE) loss function and adam optimizer.
+    model.compile(loss=config_model['loss'], optimizer='adam')
 
 
-''' *********************************************** TRAIN MODEL *********************************************** '''
-# Define number of epochs.
-epochs = config_model['epochs']
+    ''' *********************************************** TRAIN MODEL *********************************************** '''
+    # Define number of epochs.
+    epochs = config_model['epochs']
 
-# Define training and validation batch sizes using batch gradient descent (BGD).
-# BGD utilizes the entire dataset during each epoch to compute the gradients.
-batch_size = len(training_inputs)
-validation_batch_size = len(validation_inputs)
+    # Define training and validation batch sizes using batch gradient descent (BGD).
+    # BGD utilizes the entire dataset during each epoch to compute the gradients.
+    batch_size = len(training_inputs)
+    validation_batch_size = len(validation_inputs)
 
-# Early stopping is meant to prevent overfitting and save training time.
-# Define early stopping callback with a 'patience' of 50 epochs that monitors validation loss.
-early_stopping = EarlyStopping(monitor='val_loss',
-                               patience=50,  # If val_loss doesn't improve for 50 epochs, stop training.
-                               restore_best_weights=True,  # After stopping, revert to the model state with the
-                               # lowest val_loss.
-                               verbose=1)  # Print a message when early stopping is triggered.
+    # Early stopping is meant to prevent overfitting and save training time.
+    # Define early stopping callback with a 'patience' of 50 epochs that monitors validation loss.
+    early_stopping = EarlyStopping(monitor='val_loss',
+                                   patience=50,  # If val_loss doesn't improve for 50 epochs, stop training.
+                                   restore_best_weights=True,  # After stopping, revert to the model state with the
+                                   # lowest val_loss.
+                                   verbose=1)  # Print a message when early stopping is triggered.
 
-# Define model checkpoint callback that saves the model weights at the epoch that had the best validation loss.
-# In this case, it looks for the epoch with the minimum validation loss and writes the weights to the file
-# name specififed.
-model_file_name = config['model_file_name']
-checkpoint = ModelCheckpoint(model_file_name,
-                             monitor='val_loss',
-                             save_best_only=True,
-                             mode='min',
-                             verbose=1)
+    # Define model checkpoint callback that saves the model weights at the epoch that had the best validation loss.
+    # In this case, it looks for the epoch with the minimum validation loss and writes the weights to the file
+    # name specififed.
+    model_file_name = config['model_file_name']
+    checkpoint = ModelCheckpoint(model_file_name,
+                                 monitor='val_loss',
+                                 save_best_only=True,
+                                 mode='min',
+                                 verbose=1)
 
-# Add early stopping and model checkpoint to list of callbacks.
-callbacks = [early_stopping, checkpoint]
+    # Add early stopping and model checkpoint to list of callbacks.
+    callbacks = [early_stopping, checkpoint]
 
-# Fit the model using the training and validation sets we defined earlier.
-model_history = model.fit(training_inputs, training_targets,
-                          validation_data=(validation_inputs, validation_targets),
-                          epochs=epochs,
-                          batch_size=batch_size,
-                          validation_batch_size=validation_batch_size,
-                          callbacks=callbacks)
-
+    # Fit the model using the training and validation sets we defined earlier.
+    model_history = model.fit(training_inputs, training_targets,
+                              validation_data=(validation_inputs, validation_targets),
+                              epochs=epochs,
+                              batch_size=batch_size,
+                              validation_batch_size=validation_batch_size,
+                              callbacks=callbacks)
+# End create and train model.
 
 ''' *********************************************** TEST MODEL *********************************************** '''
 # Calculate and print performance metrics.
@@ -228,10 +232,11 @@ evaluate_model(model, validation_inputs, validation_targets)
 predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
 title = 'Water Level MLP Model Observed vs Predicted'
 x_label = 'Index'
-y_label = 'Elevation in meters (NAVD88)'
+y_label = 'Elevation in meters (Stn. Datum)'
 plot_file_name = config['plot_file_name']
 
-plot_model_predictions(validation_targets, predictions, title, x_label, y_label, plot_file_name)
+plot_model_predictions(validation_targets, predictions, validation_data_inputs.index, title, x_label, y_label,
+                       plot_file_name)
 
 
 
