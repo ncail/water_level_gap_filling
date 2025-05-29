@@ -1,3 +1,6 @@
 .ipynb_checkpoints
 .idea
 __pycache__
+config_mlp.json
+config_mlp_input_generation.json
+config_preprocess_data_files.json
