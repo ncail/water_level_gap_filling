@@ -64,7 +64,7 @@ def end_file_index(filename):
 # End end_file_index().
 
 
-def clean_dataframe(df, valid_cols=[""]):
+def clean_dataframe(df, drop=[]):
     # Replace missing values with NaN.
     df.replace([-999, -99, 99, 'NA', 'RM'], np.nan, inplace=True)
 
@@ -75,9 +75,8 @@ def clean_dataframe(df, valid_cols=[""]):
     for col in df.columns[1:]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        if valid_cols:
-            if col not in valid_cols:
-                df = df.drop(columns=col)
+    if drop:
+        df = df.drop(columns=[df.columns[i] for i in drop])
 
     return df
 # End clean_dataframe.

@@ -37,10 +37,11 @@ output_path = config['output_dir']
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
-# Clean dataframes: parse dates, convert to numeric, convert errors to NaN. Send to csv.
+# Clean dataframes: parse dates, convert to numeric, convert errors to NaN, drop undesired columns. Send to csv.
+drop_cols = config['drop_columns']
 output_filenames = config['output_filenames']
 for idx, df in enumerate(dataframes):
-    df = helpers.clean_dataframe(df, valid_cols=[df.columns[1]])
+    df = helpers.clean_dataframe(df, drop=drop_cols)
     df.to_csv(f'{output_path}/{output_filenames[idx]}', index=False)
 # End for.
 

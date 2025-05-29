@@ -3,5 +3,6 @@
   "data_paths": ["data/lighthouse_download/spiCoastGuard_pwl+wind+surge_mar2011-apr2012.csv",
   "data/lighthouse_download/pIsabel_pwl+wind+surge_mar2011-apr2012.csv"],
   "output_filenames": ["spiCoastGuard_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv",
-  "pIsabel_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv"]
+  "pIsabel_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv"],
+  "drop_columns": [2]
 }
