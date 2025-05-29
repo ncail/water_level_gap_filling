@@ -1,19 +1,7 @@
 {
-  "output_path": "data/lighthouse/rockport_reprocessed_04012025/Rockport-BN/rockport_preprocessed_04012025_nesscan_fix",
-  "data": {
-    "paths": {
-      "refdir": "",
-      "primarydir": "data/lighthouse/rockport_reprocessed_04012025/Rockport-BN"
-    },
-    "columns": {
-      "primary_dt_pos": 1,
-      "primary_wl_pos": 2,
-      "ref_dt_pos": 0,
-      "ref_wl_pos": 1
-    },
-    "headers": {
-      "primary": false,
-      "ref": true
-    }
-  }
+  "output_dir": "data/lighthouse_preprocessed/",
+  "data_paths": ["data/lighthouse_download/spiCoastGuard_pwl+wind+surge_mar2011-apr2012.csv",
+  "data/lighthouse_download/pIsabel_pwl+wind+surge_mar2011-apr2012.csv"],
+  "output_filenames": ["spiCoastGuard_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv",
+  "pIsabel_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv"]
 }

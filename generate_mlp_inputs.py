@@ -1,5 +1,5 @@
 """
-Assumes water level data is 6-minute and wind data is hourly.
+Assumes...??
 """
 
 # Imports.
@@ -12,7 +12,7 @@ import numpy as np
 import helpers
 
 
-# Get paths to preprocessed data from config_dataset_generation.
+# Get paths to preprocessed data from config_mlp_input_generation.json.
 config = helpers.load_configs("config_mlp_input_generation.json")
 file_paths = config['file_paths']
 
