@@ -15,15 +15,16 @@ import pandas as pd
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Input, Dropout
 from keras.models import Sequential, load_model
-# from sklearn.metrics import (mean_squared_error, root_mean_squared_error, mean_absolute_error, median_absolute_error,
-#                              r2_score, mean_absolute_percentage_error)
+from sklearn.metrics import (mean_squared_error, root_mean_squared_error, mean_absolute_error, median_absolute_error,
+                             r2_score, mean_absolute_percentage_error)
 
 import helpers
 
 ''' *********************************************** FUNCTIONS *********************************************** '''
 def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
                            plot_file_name, legend_location='best'):
-    """Plots model predictions and compares to testing labels to evaluate the model performance
+    """
+    Plots model predictions and compares to testing labels to evaluate the model performance
 
     Args:
         testing_labels (list): list of testing labels
@@ -36,10 +37,12 @@ def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
 
         y_label (string): y-axis label
 
-        plot_file_name (string): file name for plot. Must have appropriate image extension (eg. 'png', 'pdf', 'svg', ...)
+        plot_file_name (string): file name for plot. Must have appropriate image extension (eg. 'png', 'pdf', 'svg',
+        ...)
 
         legend_location (string): 'best' (Axes only), 'upper right', 'upper left', 'lower left', 'lower right', 'right',
-                                  'center left', 'center right', 'lower center', 'upper center', 'center'. Defaults to 'best'
+                                  'center left', 'center right', 'lower center', 'upper center', 'center'. Defaults
+                                  to 'best'
     """
     fig, ax = plt.subplots(1, figsize=(25, 10))
 
@@ -55,13 +58,84 @@ def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
 
-    plt.legend(fontsize = 20, loc = legend_location)
+    plt.legend(fontsize=20, loc=legend_location)
 
     plt.savefig(plot_file_name, bbox_inches='tight')
 
     plt.show()
 
     plt.close()
+
+
+def calculate_central_frequency_percentage(testing_label_array, predictions, cm):
+    """
+    Find the percentage of predictions with a central frequency (CF) of less than
+    or equal to a given number of centimeters (cm)
+
+    Args:
+        testing_label_array (array): Testing labels
+
+        predictions (array): Model predictions
+
+        cm (int): Number of centimeters
+
+    Returns:
+        (float): central frequency (CF) percentage
+    """
+    less_than_cm_counter = 0
+
+    # Convert cm to m
+    cm_to_m = cm / 100
+
+    for index, prediction in enumerate(predictions):
+        if abs(testing_label_array[index] - prediction) <= cm_to_m:
+            less_than_cm_counter += 1
+
+    cf_percentage = (less_than_cm_counter / len(predictions)) * 100
+
+    return cf_percentage
+
+
+def evaluate_model(model, testing_input_array, testing_label_array):
+    """
+    Calculates loss, makes predictions, and calculates Central Frequency (CF),
+    Mean Squared Error (MSE), Root Mean Squared Error(RMSE), Mean Absolute Error (MAE),
+    Median Absolute Error, and R-squared (R2)
+
+    Args:
+    model (tf.keras.model): The trained model
+
+    testing_input_array (array): Testing inputs
+
+    testing_label_array (array): Testing labels
+    """
+    print("Calculating Loss:")
+    test_loss = model.evaluate(testing_input_array, testing_label_array, batch_size=len(testing_input_array))
+
+    print("Loss:", test_loss)
+
+
+    print("\nGenerating output predictions with model:")
+    predictions = model.predict(testing_input_array, batch_size=len(testing_input_array))
+
+    # Calculate evaluation metrics
+    cf_15cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 15)
+    cf_5cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 5)
+    cf_1cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 1)
+    mse = mean_squared_error(testing_label_array, predictions)
+    rmse = root_mean_squared_error(testing_label_array, predictions)
+    mae = mean_absolute_error(testing_label_array, predictions)
+    medae = median_absolute_error(testing_label_array, predictions)
+    r2 = r2_score(testing_label_array, predictions)
+
+    print("\nCentral Frequency Percentage 15cm:", cf_15cm_percentage)
+    print("\nCentral Frequency Percentage 5cm:", cf_5cm_percentage)
+    print("\nCentral Frequency Percentage 1cm:", cf_1cm_percentage)
+    print("Mean Squared Error:", mse)
+    print("Root Mean Squared Error:", rmse)
+    print("Mean Absolute Error:", mae)
+    print("Median Absolute Error:", medae)
+    print("R-squared:", r2)
 
 
 ''' ************************************************ GET DATA *********************************************** '''
@@ -147,6 +221,9 @@ model_history = model.fit(training_inputs, training_targets,
 
 
 ''' *********************************************** TEST MODEL *********************************************** '''
+# Calculate and print performance metrics.
+evaluate_model(model, validation_inputs, validation_targets)
+
 # Plot observed vs predicted time series.
 predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
 title = 'Water Level MLP Model Observed vs Predicted'
