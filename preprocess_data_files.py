@@ -1,7 +1,7 @@
 """
 Script for preprocessing data downloaded from Lighthouse meant to create input for the gap-filling neural net.
 Program replaces RM, NA, etc. with NaNs and converts timestamps and values to pandas standards.
-Wind data needs to be converted from 6 minute speed-direction to hourly u-v.
+Drops specified columns using position indexing from config file.
 """
 
 # Import from repo.
@@ -9,7 +9,6 @@ import helpers
 
 # Python library imports.
 import os
-import sys
 
 
 # Program start.
@@ -25,8 +24,7 @@ for path in data_paths:
     path = helpers.verify_path(path, flag=args_flag_ptr)
 
     if args_flag_ptr[0] is False:
-        print(f"Path <{path}> does not exist. Exiting program.")
-        sys.exit()
+        raise FileNotFoundError(f"Path <{path}> does not exist. Exiting program.")
 
     df = helpers.read_file_to_df(path)
     dataframes.append(df)
