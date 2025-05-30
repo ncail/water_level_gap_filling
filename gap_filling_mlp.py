@@ -250,10 +250,16 @@ if not config['existing_model']:
 results = evaluate_model(model, validation_inputs, validation_targets)
 write_stats(config['data_arrays'], config['stats_file_name'], results[0], results[1], results[2], results[3],
             results[4], results[5], results[6], results[7], results[8])
+predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
+
+observed_vs_predicted_df = pd.DataFrame()
+observed_vs_predicted_df['timestamp'] = validation_targets.index
+observed_vs_predicted_df['observed'] = validation_targets.values
+observed_vs_predicted_df['predicted'] = predictions
+observed_vs_predicted_df.to_csv(config['predictions_filename'], index=False)
 
 # Plot observed vs predicted time series.
 if config['plot_file_name']:
-    predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
     title = 'Water Level MLP Model Observed vs Predicted'
     x_label = 'Index'
     y_label = 'Elevation in meters (Stn. Datum)'
