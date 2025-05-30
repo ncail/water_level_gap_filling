@@ -21,7 +21,7 @@ from sklearn.metrics import (mean_squared_error, root_mean_squared_error, mean_a
 import helpers
 
 ''' *********************************************** FUNCTIONS *********************************************** '''
-def plot_model_predictions(testing_labels, predictions, x_indices, title, x_label, y_label,
+def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
                            plot_file_name, legend_location='best'):
     """
     Plots model predictions and compares to testing labels to evaluate the model performance
@@ -47,8 +47,8 @@ def plot_model_predictions(testing_labels, predictions, x_indices, title, x_labe
     fig, ax = plt.subplots(1, figsize=(25, 10))
 
     # Plot the observations and model predictions on the same plot
-    plt.plot(x_indices, testing_labels, label='Observed')
-    plt.plot(x_indices, predictions, label='Predicted')
+    plt.plot(testing_labels, label='Observed')
+    plt.plot(predictions, label='Predicted')
 
     plt.title(title, fontsize=30)
 
@@ -62,7 +62,7 @@ def plot_model_predictions(testing_labels, predictions, x_indices, title, x_labe
 
     plt.savefig(plot_file_name, bbox_inches='tight')
 
-    plt.show()
+    # plt.show()
 
     plt.close()
 
@@ -235,7 +235,7 @@ x_label = 'Index'
 y_label = 'Elevation in meters (Stn. Datum)'
 plot_file_name = config['plot_file_name']
 
-plot_model_predictions(validation_targets, predictions, validation_data_inputs.index, title, x_label, y_label,
+plot_model_predictions(validation_targets, predictions, title, x_label, y_label,
                        plot_file_name)
 
 

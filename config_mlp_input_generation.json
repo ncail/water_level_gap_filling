@@ -1,9 +1,9 @@
 {
   "file_paths":
   {
-    "paired_station_data": "data/lighthouse_preprocessed/spiCoastGuard_pwl_mar2009-apr2010_preprocessed_0921-05282025.csv",
-    "target_station_wl_data": "data/lighthouse_preprocessed/pIsabel_pwl_mar2009-apr2010_preprocessed_0921-05282025.csv",
-    "output": "data/mlp_inputs/spiCoastGuard_inputs_for_pIsabel_june2008-2009_wl_only.csv"
+    "paired_station_data": "data/lighthouse_preprocessed/spiCoastGuard_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv",
+    "target_station_data": "data/lighthouse_preprocessed/pIsabel_pwl_mar2011-apr2012_preprocessed_0949-05282025.csv",
+    "output": "data/mlp_inputs/spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_pwl+wind.csv"
   },
   "output_settings":
   {
