@@ -121,6 +121,7 @@ def evaluate_model(model, testing_input_array, testing_label_array):
     # Calculate evaluation metrics
     cf_15cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 15)
     cf_5cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 5)
+    cf_2cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 2)
     cf_1cm_percentage = calculate_central_frequency_percentage(testing_label_array, predictions, 1)
     mse = mean_squared_error(testing_label_array, predictions)
     rmse = root_mean_squared_error(testing_label_array, predictions)
@@ -130,12 +131,32 @@ def evaluate_model(model, testing_input_array, testing_label_array):
 
     print("\nCentral Frequency Percentage 15cm:", cf_15cm_percentage)
     print("\nCentral Frequency Percentage 5cm:", cf_5cm_percentage)
+    print("\nCentral Frequency Percentage 2cm:", cf_2cm_percentage)
     print("\nCentral Frequency Percentage 1cm:", cf_1cm_percentage)
     print("Mean Squared Error:", mse)
     print("Root Mean Squared Error:", rmse)
     print("Mean Absolute Error:", mae)
     print("Median Absolute Error:", medae)
     print("R-squared:", r2)
+
+    return cf_15cm_percentage, cf_5cm_percentage, cf_2cm_percentage, cf_1cm_percentage, mse, rmse, mae, medae, r2
+
+
+def write_stats(data_arrays, filename, cf_15cm_percentage, cf_5cm_percentage, cf_2cm_percentage, cf_1cm_percentage,
+                mse, rmse, mae, medae, r2):
+    with open(filename, 'w') as file:
+        file.write(f"Training data: {data_arrays[0]}\n"
+                   f"Validation data: {data_arrays[1]}\n\n"
+                   f"Central Frequency Percentage 15cm: {cf_15cm_percentage}\n"
+                   f"Central Frequency Percentage 5cm: {cf_5cm_percentage}\n"
+                   f"Central Frequency Percentage 2cm: {cf_2cm_percentage}\n"
+                   f"Central Frequency Percentage 1cm: {cf_1cm_percentage}\n"
+                   f"Mean Squared Error: {mse}\n"
+                   f"Root Mean Squared Error: {rmse}\n"
+                   f"Mean Absolute Error: {mae}\n"
+                   f"Median Absolute Error: {medae}\n"
+                   f"R-squared: {r2}")
+    file.close()
 
 
 ''' ************************************************ GET DATA *********************************************** '''
@@ -226,17 +247,20 @@ if not config['existing_model']:
 
 ''' *********************************************** TEST MODEL *********************************************** '''
 # Calculate and print performance metrics.
-evaluate_model(model, validation_inputs, validation_targets)
+results = evaluate_model(model, validation_inputs, validation_targets)
+write_stats(config['data_arrays'], config['stats_file_name'], results[0], results[1], results[2], results[3],
+            results[4], results[5], results[6], results[7], results[8])
 
 # Plot observed vs predicted time series.
-predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
-title = 'Water Level MLP Model Observed vs Predicted'
-x_label = 'Index'
-y_label = 'Elevation in meters (Stn. Datum)'
-plot_file_name = config['plot_file_name']
+if config['plot_file_name']:
+    predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
+    title = 'Water Level MLP Model Observed vs Predicted'
+    x_label = 'Index'
+    y_label = 'Elevation in meters (Stn. Datum)'
+    plot_file_name = config['plot_file_name']
 
-plot_model_predictions(validation_targets, predictions, title, x_label, y_label,
-                       plot_file_name)
+    plot_model_predictions(validation_targets, predictions, title, x_label, y_label,
+                           plot_file_name)
 
 
 
