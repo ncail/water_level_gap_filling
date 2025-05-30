@@ -22,12 +22,12 @@ config = helpers.load_configs("config_mlp_input_generation.json")
 file_paths = config['file_paths']
 
 # Get data files. Parse datetimes and set as index.
-input_data = pd.read_csv(file_paths['paired_station_wl_data'], parse_dates=True, index_col=0)
-target_data = pd.read_csv(file_paths['target_station_wl_data'], parse_dates=True, index_col=0)
+input_data = pd.read_csv(file_paths['paired_station_data'], parse_dates=True, index_col=0)
+target_data = pd.read_csv(file_paths['target_station_data'], parse_dates=True, index_col=0)
 
 # Store paired station water level and wind.
-input_wl_data = input_data.drop(columns=[input_data.columns[1:]])
-input_wind_data = target_data.loc[input_data.columns[1:3]]
+input_wl_data = input_data.drop(columns=input_data.columns[1:].tolist())
+input_wind_data = target_data.drop(columns=[target_data.columns[0]])
 
 all_data_temp = pd.merge(target_data, input_wl_data, left_index=True, right_index=True, how='left',
                          suffixes=('_target', '_input'))
@@ -53,7 +53,7 @@ input_wind_data = input_wind_data[input_uv_wind_cols]  # Drop speed & direction 
 
 # Make hourly-averaged uv wind dataframe.
 if config['output_settings']['do_hourly_average_on_wind']:
-    input_wind_data = input_wind_data[['u', 'v']].resample('1H').mean()  # Hourly dataframe.
+    input_wind_data = input_wind_data[['u', 'v']].resample('1h').mean()  # Hourly dataframe.
     # Merging the 6-minute forward filled hourly wind will help us accurately drop NaNs in the next section.
     all_data = pd.merge(all_data_temp, input_wind_data, left_index=True, right_index=True, how='left')
     all_data['u'], all_data['v'] = all_data['u'].ffill(limit=9), all_data['v'].ffill(limit=9)
@@ -84,11 +84,12 @@ window_size_future_list = config['output_settings']['window_size_future']
 # Store wl and wind window sizes. Convert window size for wind to units of the water levels, necessary for
 # getting correct minimum grouping size. wind_time_per_wl_time=1 if wind and wl are same unit, =10 if wind is hourly
 # but wl is 6 min, etc.
-wind_time_per_wl_time = input_wind_data.index.to_series().diff()[1] / all_data.index.to_series().diff()[1]
+wind_time_per_wl_time = int(input_wind_data.index.to_series().diff().iloc[1] / all_data.index.to_series().diff(
+                            ).iloc[1])
 wl_past_window_size = window_size_past_list[0]
 wind_past_window_size = window_size_past_list[1] * wind_time_per_wl_time
 wl_future_window_size = window_size_past_list[0]
-wind_future_window_size = window_size_past_list[1] * wind_time_per_wl_time
+wind_future_window_size = window_size_future_list[1] * wind_time_per_wl_time
 
 max_past_window_size = max(wl_past_window_size, wind_past_window_size)
 max_future_window_size = max(wl_future_window_size, wind_future_window_size)
@@ -126,7 +127,7 @@ for group_id in valid_groups.index:
 
         # Extract wind values in steps scaled by the water level spacing.
         wind_past = wind_values[i - wind_past_window_size: i: wind_time_per_wl_time]
-        wind_future = wind_values[i + 1: i + 1 + wind_future_window_size: wind_time_per_wl_time]
+        # wind_future = wind_values[i + 1: i + 1 + wind_future_window_size: wind_time_per_wl_time]
 
         # Flatten wind (2D) and concatenate everything into a 1D input.
         input_seq = np.concatenate([wl_past, wl_future, wind_past.flatten()])
