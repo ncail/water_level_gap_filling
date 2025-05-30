@@ -1,9 +1,9 @@
 {
-  "data_arrays": ["data/mlp_inputs/spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_pwl_only.csv",
-  "data/mlp_inputs/spiCoastGuard_inputs_for_pIsabel_june2008-2009_wl_only.csv"],
-  "model_file_name": "results/pIsabel_12hr-past-wl-12hr-future-wl_spiCoastGuard-prediction.keras",
+  "data_arrays": ["data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2009-apr2010_05292025_2301.csv",
+  "data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_05292025_2259.csv"],
+  "model_file_name": "results/model_2_pIsabel_predict_spiCoastGuard.keras",
   "plot_file_name": "",
-  "stats_file_name": "results/pIsabel_12hr-past-wl-12hr-future-wl_spiCoastGuard-prediction_STATS.txt",
+  "stats_file_name": "results/model_2_pIsabel_predict_spiCoastGuard_STATS.txt",
   "existing_model": "",
 
   "mlp_parameters":
