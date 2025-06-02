@@ -1,7 +1,7 @@
 """
-Adapted from Florida_WL_MLP_model_training_NEW.ipynb by Beto Estrada (TAMUCC) by Nevena Cail.
+Adapted from Florida_WL_MLP_model_training_NEW.ipynb.
 This program builds and trains an MLP for water level predictions.
-Input data to the MLP is expected to be generated from generate_mlp_inputs.py
+Input data to the MLP is expected to be generated from generate_mlp_inputs.py, pulled from config_mlp.json.
 """
 
 # Imports.
@@ -18,55 +18,13 @@ from keras.models import Sequential, load_model
 from sklearn.metrics import (mean_squared_error, root_mean_squared_error, mean_absolute_error, median_absolute_error,
                              r2_score, mean_absolute_percentage_error)
 
+# Misc
 import helpers
+import json
+from datetime import datetime
+
 
 ''' *********************************************** FUNCTIONS *********************************************** '''
-def plot_model_predictions(testing_labels, predictions, title, x_label, y_label,
-                           plot_file_name, legend_location='best'):
-    """
-    Plots model predictions and compares to testing labels to evaluate the model performance
-
-    Args:
-        testing_labels (list): list of testing labels
-
-        predictions (list): list of model predictions
-
-        title (string): plot title
-
-        x_label (string): x-axis label
-
-        y_label (string): y-axis label
-
-        plot_file_name (string): file name for plot. Must have appropriate image extension (eg. 'png', 'pdf', 'svg',
-        ...)
-
-        legend_location (string): 'best' (Axes only), 'upper right', 'upper left', 'lower left', 'lower right', 'right',
-                                  'center left', 'center right', 'lower center', 'upper center', 'center'. Defaults
-                                  to 'best'
-    """
-    fig, ax = plt.subplots(1, figsize=(25, 10))
-
-    # Plot the observations and model predictions on the same plot
-    plt.plot(testing_labels, label='Observed')
-    plt.plot(predictions, label='Predicted')
-
-    plt.title(title, fontsize=30)
-
-    ax.set_xlabel(x_label, fontsize=22)
-    ax.set_ylabel(y_label, fontsize=22)
-
-    plt.xticks(fontsize=20, ha='right', rotation=45)
-    plt.yticks(fontsize=20)
-
-    plt.legend(fontsize=20, loc=legend_location)
-
-    plt.savefig(plot_file_name, bbox_inches='tight')
-
-    # plt.show()
-
-    plt.close()
-
-
 def calculate_central_frequency_percentage(testing_label_array, predictions, cm):
     """
     Find the percentage of predictions with a central frequency (CF) of less than
@@ -109,13 +67,8 @@ def evaluate_model(model, testing_input_array, testing_label_array):
 
     testing_label_array (array): Testing labels
     """
-    print("Calculating Loss:")
     test_loss = model.evaluate(testing_input_array, testing_label_array, batch_size=len(testing_input_array))
 
-    print("Loss:", test_loss)
-
-
-    print("\nGenerating output predictions with model:")
     predictions = model.predict(testing_input_array, batch_size=len(testing_input_array))
 
     # Calculate evaluation metrics
@@ -129,37 +82,34 @@ def evaluate_model(model, testing_input_array, testing_label_array):
     medae = median_absolute_error(testing_label_array, predictions)
     r2 = r2_score(testing_label_array, predictions)
 
-    print("\nCentral Frequency Percentage 15cm:", cf_15cm_percentage)
-    print("\nCentral Frequency Percentage 5cm:", cf_5cm_percentage)
-    print("\nCentral Frequency Percentage 2cm:", cf_2cm_percentage)
-    print("\nCentral Frequency Percentage 1cm:", cf_1cm_percentage)
-    print("Mean Squared Error:", mse)
-    print("Root Mean Squared Error:", rmse)
-    print("Mean Absolute Error:", mae)
-    print("Median Absolute Error:", medae)
-    print("R-squared:", r2)
+    results_dict = {
+        'Loss': test_loss,
+        'Central Frequency Percentage 15cm': cf_15cm_percentage,
+        'Central Frequency Percentage 5cm': cf_5cm_percentage,
+        'Central Frequency Percentage 2cm': cf_2cm_percentage,
+        'Central Frequency Percentage 1cm': cf_1cm_percentage,
+        'Mean Squared Error': mse,
+        'Root Mean Squared Error': rmse,
+        'Mean Absolute Error': mae,
+        'Median Absolute Error': medae,
+        'R-squared': r2
+    }
 
-    return cf_15cm_percentage, cf_5cm_percentage, cf_2cm_percentage, cf_1cm_percentage, mse, rmse, mae, medae, r2
+    return results_dict
 
 
-def write_stats(data_arrays, filename, cf_15cm_percentage, cf_5cm_percentage, cf_2cm_percentage, cf_1cm_percentage,
-                mse, rmse, mae, medae, r2):
+def write_stats(data_arrays, filename, results_dict):
     with open(filename, 'w') as file:
         file.write(f"Training data: {data_arrays[0]}\n"
-                   f"Validation data: {data_arrays[1]}\n\n"
-                   f"Central Frequency Percentage 15cm: {cf_15cm_percentage}\n"
-                   f"Central Frequency Percentage 5cm: {cf_5cm_percentage}\n"
-                   f"Central Frequency Percentage 2cm: {cf_2cm_percentage}\n"
-                   f"Central Frequency Percentage 1cm: {cf_1cm_percentage}\n"
-                   f"Mean Squared Error: {mse}\n"
-                   f"Root Mean Squared Error: {rmse}\n"
-                   f"Mean Absolute Error: {mae}\n"
-                   f"Median Absolute Error: {medae}\n"
-                   f"R-squared: {r2}")
+                   f"Validation data: {data_arrays[1]}\n\n")
+        json.dump(results_dict, file, indent=4)
     file.close()
 
 
 ''' ************************************************ GET DATA *********************************************** '''
+# Save off current time for file naming.
+current_timestamp = datetime.now().strftime('%m%d%Y_%H%M%S')
+
 # Get configs.
 config = helpers.load_configs('config_mlp.json')
 
@@ -184,10 +134,12 @@ validation_inputs = validation_data_inputs.values
 
 
 ''' *********************************************** BUILD MLP *********************************************** '''
+# Skip building and training if model exists ready to run/test.
 if config['existing_model']:
     model = load_model(config['existing_model'])
 
-if not config['existing_model']:
+# Build and train new model if an existing model is not being loaded to run.
+else:
     config_model = config['mlp_parameters']
 
     # Create a simple sequential model
@@ -243,32 +195,25 @@ if not config['existing_model']:
                               batch_size=batch_size,
                               validation_batch_size=validation_batch_size,
                               callbacks=callbacks)
-# End create and train model.
+# End build and train model.
 
-''' *********************************************** TEST MODEL *********************************************** '''
-# Calculate and print performance metrics.
+''' *********************************************** TEST & LOG MODEL *********************************************** '''
+# Calculate and print performance metrics. Write to txt file.
 results = evaluate_model(model, validation_inputs, validation_targets)
-write_stats(config['data_arrays'], config['stats_file_name'], results[0], results[1], results[2], results[3],
-            results[4], results[5], results[6], results[7], results[8])
+write_stats(config['data_arrays'], config['stats_file_name'], results)
 predictions = model.predict(validation_inputs, batch_size=len(validation_inputs))
 
+# Save csv of predicted vs observed.
 observed_vs_predicted_df = pd.DataFrame()
 observed_vs_predicted_df['timestamp'] = validation_targets.index
 observed_vs_predicted_df['observed'] = validation_targets.values
 observed_vs_predicted_df['predicted'] = predictions
 observed_vs_predicted_df.to_csv(config['predictions_filename'], index=False)
 
-# Plot observed vs predicted time series.
-if config['plot_file_name']:
-    title = 'Water Level MLP Model Observed vs Predicted'
-    x_label = 'Index'
-    y_label = 'Elevation in meters (Stn. Datum)'
-    plot_file_name = config['plot_file_name']
-
-    plot_model_predictions(validation_targets, predictions, title, x_label, y_label,
-                           plot_file_name)
-
-
+# Log configs.
+if config['logging_on']:
+    with open(f"{current_timestamp}_log.txt", "w") as f:
+        json.dump(config, f, indent=4)
 
 
 
