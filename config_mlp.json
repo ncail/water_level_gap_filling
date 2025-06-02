@@ -1,11 +1,11 @@
 {
-  "data_arrays": ["data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2009-apr2010_05292025_2301.csv",
-  "data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_05292025_2259.csv"],
-  "model_file_name": "results/model_2_pIsabel_predict_spiCoastGuard_run3.keras",
-  "plot_file_name": "",
-  "stats_file_name": "results/model_2_pIsabel_predict_spiCoastGuard_STATS_run1.txt",
-  "predictions_filename": "results/model_2_predictions_pIsabel_predict_spiCoastGuard_run1.csv",
-  "existing_model": "results/model_2_pIsabel_predict_spiCoastGuard.keras",
+  "data_arrays": ["spiCoastGuard_inputs_for_pIsabel_mar2009-apr2010_05292025_2301.csv",
+                  "spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_05292025_2259.csv"],
+  "model_file_name": "model_testing_mlflow.keras",
+  "stats_file_name": "testing_mlflow_model_stats.txt",
+  "predictions_filename": "testing_mlflow_model_predictions.csv",
+  "existing_model": "",
+  "logging_on": true,
 
   "mlp_parameters":
   {
