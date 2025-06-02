@@ -1,0 +1,12 @@
+Training data: data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2009-apr2010_05292025_2301.csv
+Validation data: data/mlp_inputs/model_2_3hrpwl+12hrwindpast-3hrpwlfuture/spiCoastGuard_inputs_for_pIsabel_mar2011-apr2012_05292025_2259.csv
+
+Central Frequency Percentage 15cm: 99.63030371971334
+Central Frequency Percentage 5cm: 75.3251431388162
+Central Frequency Percentage 2cm: 35.39225723277595
+Central Frequency Percentage 1cm: 18.094263072081297
+Mean Squared Error: 0.002017432848040184
+Root Mean Squared Error: 0.04491584183826664
+Mean Absolute Error: 0.03512023460818463
+Median Absolute Error: 0.029060729026794463
+R-squared: 0.9191337167349347
